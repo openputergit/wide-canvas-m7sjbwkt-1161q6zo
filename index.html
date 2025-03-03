@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G R Fly Ash Bricks - Invoice Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-gray-100 font-[Poppins]">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">G R Fly Ash Bricks</h1>
+                <p class="text-gray-600">Invoice Generator</p>
+            </div>
+
+            <!-- Form -->
+            <form id="invoiceForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Date and Day -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Date</label>
+                        <input type="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    
+                    <!-- Customer Details -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Customer Name</label>
+                        <input type="text" id="customerName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Number of Trips</label>
+                        <input type="number" id="trips" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Quantity of Bricks</label>
+                        <input type="number" id="quantity" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Rate per Brick (₹)</label>
+                        <input type="number" id="rate" min="0" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Amount Paid (₹)</label>
+                        <input type="number" id="amountPaid" min="0" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-gray-50 p-4 rounded-md">
+                    <h3 class="text-lg font-medium text-gray-900">Summary</h3>
+                    <div class="mt-4 space-y-2">
+                        <p>Total Amount: ₹<span id="totalAmount">0.00</span></p>
+                        <p>Balance: ₹<span id="balance">0.00</span></p>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <button type="reset" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        Clear
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Generate Invoice
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('invoiceForm').addEventListener('input', calculateTotals);
+        document.getElementById('invoiceForm').addEventListener('submit', handleSubmit);
+
+        function calculateTotals() {
+            const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value) || 0;
+            const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
+
+            const totalAmount = quantity * rate;
+            const balance = totalAmount - amountPaid;
+
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+            document.getElementById('balance').textContent = balance.toFixed(2);
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            
+            // Get all form values
+            const date = document.getElementById('date').value;
+            const customerName = document.getElementById('customerName').value;
+            const trips = document.getElementById('trips').value;
+            const quantity = document.getElementById('quantity').value;
+            const rate = document.getElementById('rate').value;
+            const amountPaid = document.getElementById('amountPaid').value;
+            const totalAmount = document.getElementById('totalAmount').textContent;
+            const balance = document.getElementById('balance').textContent;
+
+            // Create invoice content
+            const invoiceContent = `
+Date: ${date}
+Customer Name: ${customerName}
+Number of Trips: ${trips}
+Quantity of Bricks: ${quantity}
+Rate per Brick: ₹${rate}
+Total Amount: ₹${totalAmount}
+Amount Paid: ₹${amountPaid}
+Balance: ₹${balance}
+            `;
+
+            // Create a blob and download link
+            const blob = new Blob([invoiceContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Invoice_${customerName}_${date}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // Set default date to today
+        document.getElementById('date').valueAsDate = new Date();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
